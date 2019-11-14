@@ -7,6 +7,7 @@ from PySide2.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout
 from PySide2.QtWidgets import QLineEdit, QLabel, QPushButton, QDoubleSpinBox, QSpinBox, QMessageBox
 from PySide2.QtCore import Slot, Qt
 from PySide2.QtGui import QFontMetrics
+from PySide2.QtGui import QIcon, QPixmap
 
 class Hackgui(QDialog):
     seismic_file_name = None
@@ -16,10 +17,16 @@ class Hackgui(QDialog):
         """Constructor"""
         super(Hackgui, self).__init__(parent)
         self.setWindowTitle("Trace Infill")
-        self.setMinimumSize(300, 300)
-
+        self.setMinimumSize(350, 350)
+        label = QLabel(self)
+        pixmap = QPixmap('shell_pectin.png')  
+        label.setPixmap(pixmap.scaled(125,125,Qt.KeepAspectRatio,Qt.SmoothTransformation))
+        label.setAlignment(Qt.AlignCenter)
+        
         main_layout = QVBoxLayout()
-
+        pic_layout = QVBoxLayout()
+        pic_layout.addWidget(label)
+        main_layout.addLayout(pic_layout)
         main_layout.addLayout(self.create_status_bar())
         main_layout.addLayout(self.run_fill())
         self.setLayout(main_layout)
@@ -40,6 +47,7 @@ class Hackgui(QDialog):
                                                    "..",
                                                    "ssf (*.ssf)")
         if os.path.isfile(file_name):
+            #db8e7804cd5b462ce49d55e93e28a2d8f5896aba 
             #self.post_status(f'Loading Seismic ssf: {file_name}')
             self.seismic_file_name.setText(file_name)
             self.seismic_data = self.load_data()
@@ -57,7 +65,12 @@ class Hackgui(QDialog):
         input_layout = QHBoxLayout()
         run_alg = QPushButton('Run')
         run_alg.clicked.connect(self.execute)
+        self.save_as = QPushButton('Save as..')
+        self.save_as.clicked.connect(self.execute)
+        self.save_as.setEnabled(False)
+
         input_layout.addWidget(run_alg)
+        input_layout.addWidget(self.save_as)
         return input_layout
     def execute(self):
         pass
