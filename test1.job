@@ -1,0 +1,57 @@
+#! /bin/sh
+cd /scratch
+TMPDIR=`pwd`/`basename $0`.tmp$$
+export TMPDIR
+mkdir $TMPDIR
+cd    $TMPDIR
+#
+STAGE_PREMOUNT=NO
+export STAGE_PREMOUNT
+#
+ln -s /glb/am/sepco/seis/epw_ua_seisproc_scratch_0034/jpdata/epw_imaging/saltcrawler_18/Engin_Alkan/FOR_CHRISTIAN   dpath
+#
+DaTe=`date '+%a %h %d, %y at %r'`
+#
+#   create sesam deck
+#
+cat > card_deck << end_of_deck
+& integer max_offset = 800
+& integer decim_pct = 25
+& integer num_traces = 58806
+STLISTOPER  OPER  RUN
+DSCIN                   dpath/213.13-arch_shot_desig_4hds_SHTSEQ1015-1016-SHT1500-1550.ssf
+SIPMAP99999
+SIPMAL
+MALINS   DIMENSION Trace_Samples(-1),History_Header(192)
+MALINS   DIMENSION Trace_Header(-1)
+MALINS   DECLARE seed, rand_num
+MALINS
+MALINS  CALL RANMS1(seed,rand_num)
+MALINS  Trace_header(131) = rand_num*100
+THMANI
+THEXPR BLKST1 = TMIN ;
+THEXPR BLKEN1 = TMAX ;
+PARSTRIN
+TRARAN
+THDIRAACCEPTXDIST USPAR1
+& sub(@31,i12) max_offset, (@67,i12) decim_pct
+THOR12           0                                   0
+INFO  ....12....18....24....30....36....42....48....54....60....66....72....78
+BLAPLY CONE1     0
+PARSTRNEXT
+TRARAN
+THDIRAREJECTXDIST USPAR1
+& sub(@31,i12) max_offset, (@67,i12) decim_pct
+THOR12           0                                   0
+INFO  ....12....18....24....30....36....42....48....54....60....66....72....78
+PARSTROUT
+DSCOUT                  dpath/test1.ssf
+MEDCTL FILE_SIZE=20GB
+SIPMAP99999
+SIPFORINT16
+END
+end_of_deck
+#
+sesam -s 10000000 < card_deck > sesam_list
+#
+cat sesam_list
